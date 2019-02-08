@@ -20,18 +20,17 @@ def parseStats(html, item, attributes):
         stats = []
 
         stats = html.find_all(item, attrs=attributes)
-        stats = stats[0].tbody
-
-        stats = [getTD(stat) for stat in stats]
-
-        print(stats)
+        if len(stats) > 0:
+                stats = stats[0].tbody
+                stats = [getTD(stat) for stat in stats]
         return stats
 
 
 def getTD(stat):
-        return [st.get_text() for st in stat]
+        text = [st.get_text() for st in stat]
+        return { text[0]: {
+                        "total" : text[1],
+                        "last5Years": text[2]
+                }
+        }
 
-
-# getProfiles('https://scholar.google.es/citations?view_op=view_org&hl=es&org=15669781497478426561&')
-
-getStats('https://scholar.google.es/citations?user=fchj-TAAAAAJ&hl=es')

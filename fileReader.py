@@ -5,8 +5,9 @@ def readFile(file):
     return df
 
 def getGoogleScholarURLList(df):
-    gslist = dict(zip(formatNames(df.fullName), formatURL(df.GoogleSchoolar)))
-    print(gslist)
+    rawDict = dict(zip(formatNames(df.fullName), formatURL(df.GoogleSchoolar)))
+    return {key : value for key, value in rawDict.items() if value != ""}
+    
 
 def formatNames(names):
     names = [name.replace("[visibility=PUBLIC]", "") for name in names]
@@ -14,10 +15,6 @@ def formatNames(names):
     
 
 def formatURL(urls):
-    print(urls)
     urls = [url.replace("[visibility=PUBLIC URL=", "") for url in urls if type(url) is str]
-    urls = [url.replace("[visibility=PUBLIC URL=]", "") for url in urls if type(url) is str]
+    urls = [url.replace("[visibility=PUBLIC]", "") for url in urls if type(url) is str]
     return [url.replace("]Google Scholar", "") for url in urls if type(url) is str]
-
-
-getGoogleScholarURLList(readFile('./dataCRIS.xls'))
