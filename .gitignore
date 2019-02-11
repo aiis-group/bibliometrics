@@ -1,3 +1,4 @@
-dataCRIS.xls
+*.xls
+researchers.json
 __pycache__
-result.json
+.idea
