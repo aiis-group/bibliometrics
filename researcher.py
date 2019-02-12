@@ -1,4 +1,5 @@
 import json
+import scraper
 
 class Researcher:
     def __init__(self, first_name, last_name, crisid, orcid=None, scholar_url=None,
@@ -6,12 +7,19 @@ class Researcher:
         self.crisid = crisid
         self.first_name = first_name
         self.last_name = last_name
-        self.scholar_url = scholar_url
+        self.search_name = self.first_name +" "+ self.last_name.split(" ")[0]
+        self.search_name = self.search_name.translate(str.maketrans('áéíóúü','aeiouu'))
         self.rg_url = rg_url
         self.orcid = orcid
 
+        if scholar_url:
+            self.scholar_url = scholar_url
+        else:
+            self.scholar_url = scraper.get_scholar_url(self.search_name)
+
         # set after initialization.
         self.scholar_stats = None
+        
 
     def to_json_dict(self):
         """ A representation of this Researcher as a dict following JSON

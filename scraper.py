@@ -1,8 +1,9 @@
 from bs4 import BeautifulSoup
 import urllib.request
+import researcher
 
-def scholar_stats(url):
-        html = _get_html(url)
+def get_scholar_stats(url):
+        html = get_html(url)
         stats_table = html.find('table', {'id': "gsc_rsb_st"})
 
         if (stats_table):
@@ -19,7 +20,24 @@ def scholar_stats(url):
 
         return None
 
-def _get_html(url):
+def get_scholar_url(researcher):
+        url = "https://scholar.google.es/citations?hl=es&view_op=search_authors&mauthors="
+        url += "+".join(researcher.lower().split(" "))  
+        url += "+ulpgc&btnG="
+        html = get_html(url)
+
+        researcher_panel = html.find('h3', {'class': "gsc_oai_name"})
+        
+        if (researcher_panel):
+            scholar_url = researcher_panel.find('a')['href']
+            return "https://scholar.google.es"+scholar_url
+
+        return None
+
+
+def get_html(url):
         with urllib.request.urlopen(url) as response:
                 page = response.read()
         return BeautifulSoup(page, 'html.parser')
+
+# print(get_scholar_url("Jose Miguel Santos"))
