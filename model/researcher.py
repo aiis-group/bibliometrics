@@ -1,21 +1,12 @@
-import json
-import scraper
-
 class Researcher:
     def __init__(self, first_name, last_name, crisid, orcid=None, scholar_url=None,
                  rg_url=None ):
         self.crisid = crisid
         self.first_name = first_name
         self.last_name = last_name
-        self.search_name = self.first_name +" "+ self.last_name.split(" ")[0]
-        self.search_name = self.search_name.translate(str.maketrans('áéíóúü','aeiouu'))
+        self.scholar_url = scholar_url
         self.rg_url = rg_url
         self.orcid = orcid
-
-        if scholar_url:
-            self.scholar_url = scholar_url
-        else:
-            self.scholar_url = scraper.get_scholar_url(self.search_name)
 
         # set after initialization.
         self.scholar_stats = None
@@ -37,3 +28,8 @@ class Researcher:
         if self.scholar_stats: data['scholarStats'] = self.scholar_stats
 
         return data
+    
+    def search_name (self):
+        trans = str.maketrans('áéíóúü','aeiouu')
+        sname = (self.first_name +" "+ self.last_name.split(" ")[0]).translate(trans)
+        return sname.encode('ascii', 'ignore').decode('ascii')
