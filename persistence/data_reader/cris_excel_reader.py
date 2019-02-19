@@ -2,7 +2,7 @@ import pandas as pd
 from model.researcher import Researcher
 from persistence.data_reader.row_parser import CRISParser
 
-def extract_researchers(file, sheet_name='main_entities'):
+def load_researchers(file, sheet_name='main_entities'):
     dataframe = pd.read_excel(file, sheet_name=sheet_name)
 
     researchers = []
@@ -21,6 +21,10 @@ def extract_researchers(file, sheet_name='main_entities'):
             rg_url=row.parse_research_gate_url())
 
         researchers.append(researcher)
+
+        # TEST
+        if index > 4:
+            break
 
     print(f'\nLoad Completed! {index+1} researchers extracted')
     return researchers

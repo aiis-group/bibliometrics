@@ -1,5 +1,5 @@
-*.xls
-researchers.json
 __pycache__
 .idea
 pruebas.py
+results
+data

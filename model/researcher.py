@@ -9,10 +9,10 @@ class Researcher:
         self.orcid = orcid
 
         # set after initialization.
-        self.scholar_stats = None
+        self.scholar_data = None
         
 
-    def to_json_dict(self):
+    def to_dict(self):
         """ A representation of this Researcher as a dict following JSON
         naming conventions without None values (JSON-Compatible dict) """
 
@@ -22,10 +22,48 @@ class Researcher:
             'crisID': self.crisid
         }
 
-        if self.scholar_url:   data['googleScholarURL'] = self.scholar_url
-        if self.rg_url:        data['researchGateURL'] = self.rg_url
-        if self.orcid:         data['orcid'] = self.orcid
-        if self.scholar_stats: data['scholarStats'] = self.scholar_stats
+        if self.scholar_url:    data['googleScholarURL'] = self.scholar_url
+        if self.rg_url:         data['researchGateURL'] = self.rg_url
+        if self.orcid:          data['orcid'] = self.orcid
+        if self.scholar_data:   data['scholarStats'] = self.scholar_data
+
+        return data
+    
+    def to_dataframe(self):
+        """ A representation of this Researcher as a dataframe following Pandas
+        naming conventions without None values (Pandas-Compatible dict) """
+
+        data = {
+            'firstName': self.first_name,
+            'lastName': self.last_name,
+            'crisID': self.crisid
+        }
+
+        if self.scholar_url:    data['googleScholarURL'] = self.scholar_url
+        if self.rg_url:         data['researchGateURL'] = self.rg_url
+        if self.orcid:          data['orcid'] = self.orcid
+
+        personal_data = self.scholar_data.get("personal_data", None)
+        if personal_data:
+            if personal_data.get("personal_info", None):   
+                data['department'] = personal_data.get("personal_info", None)
+            if personal_data.get("study_fields", None):   
+                data['study_fields'] = ':'.join(personal_data.get("study_fields", None))
+            
+        stats = self.scholar_data.get("stats", None)
+        if stats:
+            citations = stats.get("citations", None) 
+            if citations:   
+                data['total_citations'] = citations.get("total", None)
+                data['last5Years_citations'] = citations.get("last5Years", None)
+            hIndex = stats.get("hIndex", None)
+            if hIndex:   
+                data['total_hIndex'] = hIndex.get("total", None)
+                data['last5Years_hIndex'] = hIndex.get("last5Years", None)
+            i10 = stats.get("i10", None)
+            if i10:   
+                data['total_i10'] = i10.get("total", None)
+                data['last5Years_i10'] = i10.get("last5Years", None)
 
         return data
     

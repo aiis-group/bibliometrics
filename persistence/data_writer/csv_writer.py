@@ -1,7 +1,5 @@
+import pandas as pd
+import model.researcher
 
-# TODO change writer into csv writer
-# import json
-
-# def write_researchers_json(researchers):
-#     with open('researchers.json', 'w', encoding="utf-8") as fp:
-#         json.dump([r.to_json_dict() for r in researchers], fp, ensure_ascii=False)
+def store_researchers(researchers):
+    pd.DataFrame([researcher.to_dataframe() for researcher in researchers]).to_csv("results/researchers.csv")

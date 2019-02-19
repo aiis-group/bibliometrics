@@ -3,6 +3,12 @@ import urllib.request
 import model.researcher
 
 
+def get_data(url):
+    return {
+        'personal_data': get_personal_data(url),
+        'stats' : get_stats(url)
+    }
+
 def get_stats(url):
     html = get_html(url)
     stats_table = html.find('table', {'id': "gsc_rsb_st"})
@@ -14,9 +20,9 @@ def get_stats(url):
         i10 = stats_row[2].findAll("td")
 
         return {
-            'citations': {'total': cit[1].get_text(), 'last5Years': cit[2].get_text()},
-            'hIndex': {'total': hIndex[1].get_text(), 'last5Years': hIndex[2].get_text()},
-            'i10': {'total': i10[1].get_text(), 'last5Years': i10[2].get_text()}
+            'citations': {'total': int(cit[1].get_text()), 'last5Years': int(cit[2].get_text())},
+            'hIndex': {'total': int(hIndex[1].get_text()), 'last5Years': int(hIndex[2].get_text())},
+            'i10': {'total': int(i10[1].get_text()), 'last5Years': int(i10[2].get_text())}
         }
 
     return None
@@ -24,18 +30,19 @@ def get_stats(url):
 
 def get_personal_data(url):
     html = get_html(url)
-    stats_table = html.find('table', {'id': "gsc_rsb_st"})
 
-    if (stats_table):
-        stats_row = stats_table.tbody.findAll('tr')
-        cit = stats_row[0].findAll("td")
-        hIndex = stats_row[1].findAll("td")
-        i10 = stats_row[2].findAll("td")
+    personal_info = html.find('div', {'id': "gsc_prf_i"}).find('div', {'class':'gsc_prf_il'})
 
+    if (personal_info):
+        personal_info = personal_info.get_text()
+
+    study_fields = html.find('div', {'id': "gsc_prf_int"})
+
+    if (study_fields):
+        study_fields = [study_field.get_text().lower() for study_field in study_fields.findAll('a')]
         return {
-            'citations': {'total': cit[1].get_text(), 'last5Years': cit[2].get_text()},
-            'hIndex': {'total': hIndex[1].get_text(), 'last5Years': hIndex[2].get_text()},
-            'i10': {'total': i10[1].get_text(), 'last5Years': i10[2].get_text()}
+            'personal_info': personal_info,
+            'study_fields': study_fields
         }
 
     return None
