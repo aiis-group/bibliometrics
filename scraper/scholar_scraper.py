@@ -31,17 +31,20 @@ def get_stats(url):
 def get_personal_data(url):
     html = get_html(url)
 
-    personal_info = html.find('div', {'id': "gsc_prf_i"}).find('div', {'class':'gsc_prf_il'})
-
+    personal_info = html.find('div', {'id': "gsc_prf_i"})
+    personal_data = None
+    
     if (personal_info):
-        personal_info = personal_info.get_text()
+        personal_info = personal_info.find('div', {'class':'gsc_prf_il'})
+        if personal_info:
+            personal_data = personal_info.get_text()
 
     study_fields = html.find('div', {'id': "gsc_prf_int"})
 
     if (study_fields):
         study_fields = [study_field.get_text().lower() for study_field in study_fields.findAll('a')]
         return {
-            'personal_info': personal_info,
+            'personal_info': personal_data,
             'study_fields': study_fields
         }
 
