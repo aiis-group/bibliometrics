@@ -23,8 +23,8 @@ def load_researchers(file, sheet_name='main_entities'):
         researchers.append(researcher)
 
         # TEST
-        if index > 4:
-            break
+        # if index > 4:
+        #     break
 
     print(f'\nLoad Completed! {index+1} researchers extracted')
     return researchers

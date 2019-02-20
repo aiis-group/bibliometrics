@@ -43,6 +43,9 @@ class Researcher:
         if self.rg_url:         data['researchGateURL'] = self.rg_url
         if self.orcid:          data['orcid'] = self.orcid
 
+        if self.scholar_data == None:
+            return data
+
         personal_data = self.scholar_data.get("personal_data", None)
         if personal_data:
             if personal_data.get("personal_info", None):   
