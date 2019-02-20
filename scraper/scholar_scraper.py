@@ -1,7 +1,9 @@
 from bs4 import BeautifulSoup
 import urllib.request
-import model.researcher
 
+
+# Store the last url and html in order to evade multiple requests.
+_last_petition = { "url": "", "html": ""};
 
 def get_data(url):
     return {
@@ -64,10 +66,16 @@ def get_url(researcher_name):
     return None
 
 
-def get_html(url, headers=None):
+def get_html(url, cache_last=True):
+    if _last_petition['url'] == url and cache_last:
+        return _last_petition['html']
+
     request = urllib.request.Request(url)
     try:
         response = urllib.request.urlopen(request)
-        return BeautifulSoup(response.read(), 'html.parser')
+        html = BeautifulSoup(response.read(), 'html.parser')
+        _last_petition["url"] = url
+        _last_petition["html"] = html
+        return html
     except urllib.error.HTTPError as err:
         print("\n", err)
