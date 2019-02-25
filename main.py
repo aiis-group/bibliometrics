@@ -6,12 +6,14 @@ import time, sys, os, argparse
 
 _input_file = './data/dataCRIS.xls'
 _output_dir = './results'
+_format = ['json', 'csv', 'xls']
 
 def parseArgs():
-    global _input_file, _output_dir;
+    global _input_file, _output_dir, _format
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("-i", "--input", required=False)
     parser.add_argument("-o", "--output", required=False)
+    parser.add_argument("-f", "--format", required=False)
     parser.add_argument("-h", "--help", required=False, action="store_true")
     args = parser.parse_args()
 
@@ -22,13 +24,18 @@ def parseArgs():
               "\n  i input_file - CRIS input file (only xls for now)."
               "\n      default: ./data/dataCRIS.xls"
               "\n  o output_dir - output directory. Will be created if doesn't exist."
-              "\n      default: ./results")
+              "\n      default: ./results"
+              "\n  f format - output format. Can be csv json or xls. Multiple option"
+              "\n      default: \"csv,json,xls\"")
         exit(0)
     if args.input: _input_file = args.input
     if args.output: _output_dir = args.output
+    if args.format: _format = args.format.split(",")
+    print(_format)
 
 if __name__== "__main__":
     parseArgs()
+
     if not os.path.exists(_output_dir):
         os.makedirs(_output_dir)
         print("Created: " + os.path.abspath(_output_dir))
@@ -49,9 +56,12 @@ if __name__== "__main__":
     end_scrap = time.time()
     
     start_store = time.time()
-    json_writer.store_researchers(researchers, _output_dir + "/researchers.json")
-    csv_writer.store_researchers(researchers, _output_dir + "/researchers.csv")
-    xls_writer.store_researchers(researchers, _output_dir + "/researchers.xls")
+    if 'json' in _format:
+        json_writer.store_researchers(researchers, _output_dir + "/researchers.json")
+    if 'csv' in _format:
+        csv_writer.store_researchers(researchers, _output_dir + "/researchers.csv")
+    if 'xls' in _format:
+        xls_writer.store_researchers(researchers, _output_dir + "/researchers.json")
     end_store = time.time()
 
     end = time.time()

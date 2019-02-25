@@ -1,11 +1,13 @@
 from bs4 import BeautifulSoup
 import urllib.request
+import logging
 
 
 # Store the last url and html in order to evade multiple requests.
-_last_petition = { "url": "", "html": ""};
+_last_petition = { "url": "", "html": ""}
 
 def get_data(url):
+    get_html(url)
     return {
         'personal_data': get_personal_data(url),
         'stats' : get_stats(url)
@@ -13,7 +15,12 @@ def get_data(url):
 
 def get_stats(url):
     html = get_html(url)
+
+    if not html:
+        return None
+
     stats_table = html.find('table', {'id': "gsc_rsb_st"})
+    stats_hist = html.find('div', {'class': "gsc_md_hist_b"})
 
     if (stats_table):
         stats_row = stats_table.tbody.findAll('tr')
@@ -21,17 +28,31 @@ def get_stats(url):
         hIndex = stats_row[1].findAll("td")
         i10 = stats_row[2].findAll("td")
 
-        return {
-            'citations': {'total': int(cit[1].get_text()), 'last5Years': int(cit[2].get_text())},
-            'hIndex': {'total': int(hIndex[1].get_text()), 'last5Years': int(hIndex[2].get_text())},
-            'i10': {'total': int(i10[1].get_text()), 'last5Years': int(i10[2].get_text())}
+        stats = {
+            'citations': {'total': cit[1].get_text(),'last5Years': cit[2].get_text()},
+            'hIndex': {'total': hIndex[1].get_text(), 'last5Years': hIndex[2].get_text()},
+            'i10': {'total': i10[1].get_text(), 'last5Years': i10[2].get_text()}
         }
 
+        # TODO Get the citations by year noticing the years with 0 citations (error: not in html)
+        # if (stats_hist):
+        #     hist_years = [year.get_text() for year in stats_hist.findAll('span', {'class': 'gsc_g_t'})]
+        #     hist_stats = [year.get_text() for year in stats_hist.findAll('span', {'class': 'gsc_g_al'})]
+        #     citations_hist = dict(zip(hist_years, hist_stats))
+
+        #     stats["citationsByYear"] = citations_hist
+
+        return stats 
+    
+    
     return None
 
 
 def get_personal_data(url):
     html = get_html(url)
+
+    if not html:
+        return None
 
     personal_info = html.find('div', {'id': "gsc_prf_i"})
     personal_data = None
@@ -44,7 +65,7 @@ def get_personal_data(url):
     study_fields = html.find('div', {'id': "gsc_prf_int"})
 
     if (study_fields):
-        study_fields = [study_field.get_text().lower() for study_field in study_fields.findAll('a')]
+        study_fields = [study_field.get_text() for study_field in study_fields.findAll('a')]
         return {
             'personal_info': personal_data,
             'study_fields': study_fields
@@ -81,4 +102,4 @@ def get_html(url, cache_last=True):
         _last_petition["html"] = html
         return html
     except urllib.error.HTTPError as err:
-        print("\n", err)
+        logging.warning(err)
