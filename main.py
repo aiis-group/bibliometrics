@@ -52,6 +52,7 @@ if __name__== "__main__":
     for index, researcher in enumerate(researchers_in_scholar):
         print(f'\rScraping Google Scholar Stats... [{index}/{size}]', end='')
         researcher.scholar_data = scraper.get_data(researcher.scholar_url)
+
     print(f'\rScraping Google Scholar Stats... [{index}/{size}] Done!')
     end_scrap = time.time()
     
@@ -61,7 +62,7 @@ if __name__== "__main__":
     if 'csv' in _format:
         csv_writer.store_researchers(researchers, _output_dir + "/researchers.csv")
     if 'xls' in _format:
-        xls_writer.store_researchers(researchers, _output_dir + "/researchers.json")
+        xls_writer.store_researchers(researchers, _output_dir + "/researchers.xls")
     end_store = time.time()
 
     end = time.time()
