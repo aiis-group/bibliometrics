@@ -102,4 +102,5 @@ def get_html(url, cache_last=True):
         _last_petition["html"] = html
         return html
     except urllib.error.HTTPError as err:
+        print('\r', end='')
         logging.warning(err)
