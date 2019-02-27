@@ -6,12 +6,14 @@ import logging
 # Store the last url and html in order to evade multiple requests.
 _last_petition = { "url": "", "html": ""}
 
+
 def get_data(url):
     get_html(url)
     return {
         'personal_data': get_personal_data(url),
         'stats' : get_stats(url)
     }
+
 
 def get_stats(url):
     html = get_html(url)
@@ -22,7 +24,7 @@ def get_stats(url):
     stats_table = html.find('table', {'id': "gsc_rsb_st"})
     stats_hist = html.find('div', {'class': "gsc_md_hist_b"})
 
-    if (stats_table):
+    if stats_table:
         stats_row = stats_table.tbody.findAll('tr')
         cit = stats_row[0].findAll("td")
         hIndex = stats_row[1].findAll("td")
@@ -34,17 +36,20 @@ def get_stats(url):
             'i10': {'total': i10[1].get_text(), 'last5Years': i10[2].get_text()}
         }
 
-        # TODO Get the citations by year noticing the years with 0 citations (error: not in html)
-        # if (stats_hist):
-        #     hist_years = [year.get_text() for year in stats_hist.findAll('span', {'class': 'gsc_g_t'})]
-        #     hist_stats = [year.get_text() for year in stats_hist.findAll('span', {'class': 'gsc_g_al'})]
-        #     citations_hist = dict(zip(hist_years, hist_stats))
+        if stats_hist:
+            last_year = int(stats_hist.findAll('span', {'class': 'gsc_g_t'})[-1].get_text())
+            citations = stats_hist.findAll('a', {'class': 'gsc_g_a'})
 
-        #     stats["citationsByYear"] = citations_hist
+            citations_per_year = {}
+
+            for a in citations:
+                z_index = int(a.get_attribute_list('style')[0].split(':')[-1])
+                citations_per_year[last_year - (z_index - 1)] = a.find("span").get_text()
+
+            stats["citationsPerYear"] = citations_per_year;
 
         return stats 
-    
-    
+
     return None
 
 
@@ -74,22 +79,6 @@ def get_personal_data(url):
     return None
 
 
-def get_url(researcher_name):
-    url = "https://scholar.google.es/citations?hl=es&view_op=search_authors&mauthors="
-    url += "+".join(researcher_name.lower().split(" "))
-    url += "+ulpgc&btnG="
-    html = get_html(url)
-
-    if html != None:
-        researcher_panel = html.find('h3', {'class': "gsc_oai_name"})
-
-        if (researcher_panel):
-            scholar_url = researcher_panel.find('a')['href']
-            return "https://scholar.google.es"+scholar_url
-
-    return None
-
-
 def get_html(url, cache_last=True):
     if _last_petition['url'] == url and cache_last:
         return _last_petition['html']
@@ -102,5 +91,24 @@ def get_html(url, cache_last=True):
         _last_petition["html"] = html
         return html
     except urllib.error.HTTPError as err:
-        print('\r', end='')
-        logging.warning(err)
+        logging.warning("\n\r" + err + " - " + url)
+
+
+
+
+# TODO (Futuro) buscar la URL de Scholar del investigador/a si no tiene.
+#       Requiere cuidado con captchas.
+# def get_url(researcher_name):
+#     url = "https://scholar.google.es/citations?hl=es&view_op=search_authors&mauthors="
+#     url += "+".join(researcher_name.lower().split(" "))
+#     url += "+ulpgc&btnG="
+#     html = get_html(url)
+#
+#     if html != None:
+#         researcher_panel = html.find('h3', {'class': "gsc_oai_name"})
+#
+#         if (researcher_panel):
+#             scholar_url = researcher_panel.find('a')['href']
+#             return "https://scholar.google.es"+scholar_url
+#
+#     return None
