@@ -11,9 +11,10 @@ Python script that reads ULPGC researcher data from a file and scraps informatio
     - Citations
     - i10 Index
     - h Index
+    - Citations per year (only JSON. TODO: xls csv!!)
 - Data formatting
 
-## Installation
+## Installation (TODO!!)
 
 To install it, just go to the folder you want this script to be in, copy the installer and run it
 

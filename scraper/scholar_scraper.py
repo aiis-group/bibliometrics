@@ -8,7 +8,6 @@ _last_petition = { "url": "", "html": ""}
 
 
 def get_data(url):
-    get_html(url)
     return {
         'personal_data': get_personal_data(url),
         'stats' : get_stats(url)
@@ -83,15 +82,18 @@ def get_html(url, cache_last=True):
     if _last_petition['url'] == url and cache_last:
         return _last_petition['html']
 
+    _last_petition["url"] = url
     request = urllib.request.Request(url)
     try:
         response = urllib.request.urlopen(request)
         html = BeautifulSoup(response.read(), 'html.parser')
-        _last_petition["url"] = url
         _last_petition["html"] = html
         return html
     except urllib.error.HTTPError as err:
-        logging.warning("\n\r" + err + " - " + url)
+        logging.warning(str(err) + " - " + url)
+        _last_petition["html"] = None
+
+    return None
 
 
 

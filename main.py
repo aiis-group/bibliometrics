@@ -6,15 +6,17 @@ import time, sys, os, argparse, logging
 
 _input_file = './data/dataCRIS.xls'
 _output_dir = './results'
+_log_file = None
 _format = ['json', 'csv', 'xls']
 
 def parseArgs():
-    global _input_file, _output_dir, _format
+    global _input_file, _output_dir, _format, _log_file
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("-i", "--input", required=False)
     parser.add_argument("-o", "--output", required=False)
     parser.add_argument("-f", "--format", required=False)
     parser.add_argument("-h", "--help", required=False, action="store_true")
+    parser.add_argument("-l", "--log", required=False)
     args = parser.parse_args()
 
     if args.help:
@@ -26,15 +28,20 @@ def parseArgs():
               "\n  [-o --output] output_dir - output directory. Will be created if doesn't exist."
               "\n      default: ./results"
               "\n  [-f --format] output_format - output format. Can be csv, json or xls. Multiple option"
-              "\n      default: \"csv,json,xls\"")
+              "\n      default: \"csv,json,xls\""
+              "\n  [-l --log] filename - output log file. FIle logging disabled by default")
         exit(0)
     if args.input: _input_file = args.input
     if args.output: _output_dir = args.output
+    if args.log: _log_file = args.log
     if args.format: _format = args.format.split(",")
 
 if __name__== "__main__":
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s', datefmt='%H:%M:%S')
     parseArgs()
+
+    logging.basicConfig(level=logging.DEBUG, filename=_log_file, format='%(asctime)s %(levelname)s %(message)s', datefmt='%H:%M:%S')
+    if _log_file is not None:
+        logging.getLogger().addHandler(logging.StreamHandler())
 
     if not os.path.exists(_output_dir):
         os.makedirs(_output_dir)
@@ -53,8 +60,8 @@ if __name__== "__main__":
     for index, researcher in enumerate(researchers_in_scholar):
         print(f'\rScraping Google Scholar Stats... [{index}/{size}]', end='')
         researcher.scholar_data = scraper.get_data(researcher.scholar_url)
-        if ((not researcher.scholar_data['personal_data']) and (not researcher.scholar_data['stats'])):
-            wmessage = str("\rScholar URL Deprecated, please update: "+ researcher.first_name + " "+ researcher.last_name + "\n")
+        if not researcher.scholar_data['personal_data'] and not researcher.scholar_data['stats']:
+            wmessage = str("Scholar URL Deprecated, please update: "+ researcher.first_name + " "+ researcher.last_name)
             logging.warning(wmessage)
 
     print(f'\rScraping Google Scholar Stats... [{index}/{size}] Done!')
@@ -78,4 +85,5 @@ if __name__== "__main__":
     print("Tiempo de carga: ", time.strftime("%H:%M:%S", time.gmtime(end_load - start_load)))
     print("Tiempo de scrap: ", time.strftime("%H:%M:%S", time.gmtime(end_scrap - start_scrap)))
     print("Tiempo de guardado: ", time.strftime("%H:%M:%S", time.gmtime(end_store - start_store)))
+
 
