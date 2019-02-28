@@ -67,8 +67,9 @@ class Researcher:
             if i10:   
                 data['total_i10'] = i10.get("total", None)
                 data['last5Years_i10'] = i10.get("last5Years", None)
-
-        # TODO add citations per years
+            citationsPerYear = stats.get("citationsPerYear", None)
+            if citationsPerYear:
+                data['citations_per_year'] = ';'.join([key+":"+val for key,val in citationsPerYear.items()])
         return data
     
     def search_name (self):

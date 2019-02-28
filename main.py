@@ -34,14 +34,18 @@ def parseArgs():
     if args.input: _input_file = args.input
     if args.output: _output_dir = args.output
     if args.log: _log_file = args.log
-    if args.format: _format = args.format.split(",")
+    if args.format: _format = [f.strip() for f in args.format.split(",")]
 
-if __name__== "__main__":
+
+if __name__ == "__main__":
     parseArgs()
 
-    logging.basicConfig(level=logging.DEBUG, filename=_log_file, format='%(asctime)s %(levelname)s %(message)s', datefmt='%H:%M:%S')
+    logging_handlers = [logging.StreamHandler()]
     if _log_file is not None:
-        logging.getLogger().addHandler(logging.StreamHandler())
+        logging_handlers.append(logging.FileHandler(_log_file, 'w', 'utf-8'))
+
+    logging.basicConfig(handlers=logging_handlers, level=logging.DEBUG, datefmt='%H:%M:%S',
+                        format='%(asctime)s %(levelname)s %(message)s')
 
     if not os.path.exists(_output_dir):
         os.makedirs(_output_dir)
@@ -58,11 +62,12 @@ if __name__== "__main__":
     researchers_in_scholar = [r for r in researchers if r.scholar_url]
     size = len(researchers_in_scholar)
     for index, researcher in enumerate(researchers_in_scholar):
-        print(f'\rScraping Google Scholar Stats... [{index}/{size}]', end='')
+        print(f'\rScraping Google Scholar Stats... [{index + 1}/{size}]: {researcher.last_name}', end='')
         researcher.scholar_data = scraper.get_data(researcher.scholar_url)
         if not researcher.scholar_data['personal_data'] and not researcher.scholar_data['stats']:
             wmessage = str("Scholar URL Deprecated, please update: "+ researcher.first_name + " "+ researcher.last_name)
             logging.warning(wmessage)
+            logging.getLogger().handlers[0].flush()
 
     print(f'\rScraping Google Scholar Stats... [{index}/{size}] Done!')
 

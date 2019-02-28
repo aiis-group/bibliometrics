@@ -36,14 +36,14 @@ def get_stats(url):
         }
 
         if stats_hist:
-            last_year = int(stats_hist.findAll('span', {'class': 'gsc_g_t'})[-1].get_text())
+            last_year = int(stats_hist.findAll('span', {'class': 'gsc_g_t'})[-1].get_text()) + 1
             citations = stats_hist.findAll('a', {'class': 'gsc_g_a'})
 
             citations_per_year = {}
 
             for a in citations:
                 z_index = int(a.get_attribute_list('style')[0].split(':')[-1])
-                citations_per_year[last_year - (z_index - 1)] = a.find("span").get_text()
+                citations_per_year[str(last_year - z_index)] = a.find("span").get_text()
 
             stats["citationsPerYear"] = citations_per_year;
 
