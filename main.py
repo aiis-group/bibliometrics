@@ -3,7 +3,6 @@ from persistence.data_writer import json_writer, csv_writer, xls_writer
 from persistence.data_reader import cris_excel_reader as reader
 import time, sys, os, argparse, logging
 
-
 _input_file = './data/dataCRIS.xls'
 _output_dir = './results'
 _log_file = None
@@ -21,14 +20,14 @@ def parseArgs():
 
     if args.help:
         basename = os.path.basename(__file__)
-        print(f"Use: {basename} [h, -i input_file, -o output_dir]"
-              "\n  [-h --help] - show this help and exit."
-              "\n  [-i --input] input_file - CRIS input file (only xls for now)."
-              "\n      default: ./data/dataCRIS.xls"
-              "\n  [-o --output] output_dir - output directory. Will be created if doesn't exist."
-              "\n      default: ./results"
-              "\n  [-f --format] output_format - output format. Can be csv, json or xls. Multiple option"
-              "\n      default: \"csv,json,xls\""
+        print("Use: %s [h, -i input_file, -o output_dir]" % basename,
+              "\n  [-h --help] - show this help and exit.",
+              "\n  [-i --input] input_file - CRIS input file (only xls for now).",
+              "\n      default: ./data/dataCRIS.xls",
+              "\n  [-o --output] output_dir - output directory. Will be created if doesn't exist.",
+              "\n      default: ./results",
+              "\n  [-f --format] output_format - output format. Can be csv, json or xls. Multiple option",
+              "\n      default: \"csv,json,xls\"",
               "\n  [-l --log] filename - output log file. FIle logging disabled by default")
         exit(0)
     if args.input: _input_file = args.input
@@ -62,14 +61,15 @@ if __name__ == "__main__":
     researchers_in_scholar = [r for r in researchers if r.scholar_url]
     size = len(researchers_in_scholar)
     for index, researcher in enumerate(researchers_in_scholar):
-        print(f'\rScraping Google Scholar Stats... [{index + 1}/{size}]: {researcher.last_name}', end='')
+        print("\rScraping Google Scholar Stats... [%s/%s]: %s" % (index + 1, size, researcher.last_name), end='')
+
         researcher.scholar_data = scraper.get_data(researcher.scholar_url)
         if not researcher.scholar_data['personal_data'] and not researcher.scholar_data['stats']:
             wmessage = str("Scholar URL Deprecated, please update: "+ researcher.first_name + " "+ researcher.last_name)
             logging.warning(wmessage)
             logging.getLogger().handlers[0].flush()
 
-    print(f'\rScraping Google Scholar Stats... [{index}/{size}] Done!')
+    print("\rScraping Google Scholar Stats... [%s/%s] Done!" % (index + 1, size), )
 
     end_scrap = time.time()
     
