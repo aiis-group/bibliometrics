@@ -1,7 +1,7 @@
-import scraper.scholar_scraper as scraper
+from scraper.scholar_scraper import ScholarScraper
 from persistence.data_writer import json_writer, csv_writer, xls_writer
 from persistence.data_reader import cris_excel_reader as reader
-import time, sys, os, argparse, logging
+import time, os, argparse, logging
 
 _input_file = './data/dataCRIS.xls'
 _output_dir = './results'
@@ -36,9 +36,7 @@ def parseArgs():
     if args.format: _format = [f.strip() for f in args.format.split(",")]
 
 
-if __name__ == "__main__":
-    parseArgs()
-
+def configure_loggin():
     logging_handlers = [logging.StreamHandler()]
     if _log_file is not None:
         logging_handlers.append(logging.FileHandler(_log_file, 'w', 'utf-8'))
@@ -46,41 +44,61 @@ if __name__ == "__main__":
     logging.basicConfig(handlers=logging_handlers, level=logging.DEBUG, datefmt='%H:%M:%S',
                         format='%(asctime)s %(levelname)s %(message)s')
 
-    if not os.path.exists(_output_dir):
-        os.makedirs(_output_dir)
-        print("Created: " + os.path.abspath(_output_dir))
 
-    start = time.time()
-    
-    start_load = time.time()
-    researchers = reader.load_researchers(_input_file, 'main_entities')
-    end_load = time.time()
-
-    start_scrap = time.time()
-
+def scrap_scholar(researchers):
+    scraper = ScholarScraper()
     researchers_in_scholar = [r for r in researchers if r.scholar_url]
     size = len(researchers_in_scholar)
     for index, researcher in enumerate(researchers_in_scholar):
-        print("\rScraping Google Scholar Stats... [%s/%s]: %s" % (index + 1, size, researcher.last_name), end='')
+        print("\rScraping Google Scholar Stats... [%s/%s]" % (index + 1, size), end='')
 
-        researcher.scholar_data = scraper.get_data(researcher.scholar_url)
-        if not researcher.scholar_data['personal_data'] and not researcher.scholar_data['stats']:
-            wmessage = str("Scholar URL Deprecated, please update: "+ researcher.first_name + " "+ researcher.last_name)
+        scholar_data = {
+            'personal_data': scraper.get_personal_data(researcher.scholar_url),
+            'stats': scraper.get_stats(researcher.scholar_url)
+        }
+
+        if not scholar_data['personal_data'] and not scholar_data['stats']:
+            wmessage = str(
+                "Scholar URL Deprecated, please update: " + researcher.first_name + " " + researcher.last_name)
             logging.warning(wmessage)
             logging.getLogger().handlers[0].flush()
+        else:
+            researcher.scholar_data = scholar_data
 
     print("\rScraping Google Scholar Stats... [%s/%s] Done!" % (index + 1, size), )
 
-    end_scrap = time.time()
-    
-    start_store = time.time()
 
+def store_results(researchers):
     if 'json' in _format:
         json_writer.store_researchers(researchers, _output_dir + "/researchers.json")
     if 'csv' in _format:
         csv_writer.store_researchers(researchers, _output_dir + "/researchers.csv")
     if 'xls' in _format:
         xls_writer.store_researchers(researchers, _output_dir + "/researchers.xls")
+
+
+if __name__ == "__main__":
+    parseArgs()
+
+    configure_loggin()
+
+    if not os.path.exists(_output_dir):
+        os.makedirs(_output_dir)
+        print("Created: " + os.path.abspath(_output_dir))
+
+
+    start = time.time()
+
+    start_load = time.time()
+    researchers = reader.load_researchers(_input_file, 'main_entities')
+    end_load = time.time()
+
+    start_scrap = time.time()
+    scrap_scholar(researchers)
+    end_scrap = time.time()
+    
+    start_store = time.time()
+    store_results(researchers)
     end_store = time.time()
 
     end = time.time()
@@ -90,5 +108,3 @@ if __name__ == "__main__":
     print("Tiempo de carga: ", time.strftime("%H:%M:%S", time.gmtime(end_load - start_load)))
     print("Tiempo de scrap: ", time.strftime("%H:%M:%S", time.gmtime(end_scrap - start_scrap)))
     print("Tiempo de guardado: ", time.strftime("%H:%M:%S", time.gmtime(end_store - start_store)))
-
-

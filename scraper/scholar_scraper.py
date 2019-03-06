@@ -1,99 +1,68 @@
-from bs4 import BeautifulSoup
-import urllib.request
-import logging
+from .scraper import Scraper
 
+class ScholarScraper(Scraper):
 
-# Store the last url and html in order to evade multiple requests.
-_last_petition = { "url": "", "html": ""}
+    def get_stats(self, url):
+        html = self._get_html(url)
 
+        if not html: return None
 
-def get_data(url):
-    return {
-        'personal_data': get_personal_data(url),
-        'stats' : get_stats(url)
-    }
+        stats_table = html.find('table', {'id': "gsc_rsb_st"})
+        stats_hist = html.find('div', {'class': "gsc_md_hist_b"})
 
+        if stats_table:
+            stats_row = stats_table.tbody.findAll('tr')
+            cit = stats_row[0].findAll("td")
+            hIndex = stats_row[1].findAll("td")
+            i10 = stats_row[2].findAll("td")
 
-def get_stats(url):
-    html = get_html(url)
+            stats = {
+                'citations': {'total': cit[1].get_text(), 'last5Years': cit[2].get_text()},
+                'hIndex': {'total': hIndex[1].get_text(), 'last5Years': hIndex[2].get_text()},
+                'i10': {'total': i10[1].get_text(), 'last5Years': i10[2].get_text()}
+            }
 
-    if not html:
+            if stats_hist:
+                last_year = int(stats_hist.findAll('span', {'class': 'gsc_g_t'})[-1].get_text()) + 1
+                citations = stats_hist.findAll('a', {'class': 'gsc_g_a'})
+
+                citations_per_year = {}
+
+                for a in citations:
+                    z_index = int(a.get_attribute_list('style')[0].split(':')[-1])
+                    citations_per_year[str(last_year - z_index)] = a.find("span").get_text()
+
+                stats["citationsPerYear"] = citations_per_year
+
+            return stats
+
         return None
 
-    stats_table = html.find('table', {'id': "gsc_rsb_st"})
-    stats_hist = html.find('div', {'class': "gsc_md_hist_b"})
 
-    if stats_table:
-        stats_row = stats_table.tbody.findAll('tr')
-        cit = stats_row[0].findAll("td")
-        hIndex = stats_row[1].findAll("td")
-        i10 = stats_row[2].findAll("td")
+    def get_personal_data(self, url):
+        html = self._get_html(url)
 
-        stats = {
-            'citations': {'total': cit[1].get_text(),'last5Years': cit[2].get_text()},
-            'hIndex': {'total': hIndex[1].get_text(), 'last5Years': hIndex[2].get_text()},
-            'i10': {'total': i10[1].get_text(), 'last5Years': i10[2].get_text()}
-        }
+        if not html:
+            return None
 
-        if stats_hist:
-            last_year = int(stats_hist.findAll('span', {'class': 'gsc_g_t'})[-1].get_text()) + 1
-            citations = stats_hist.findAll('a', {'class': 'gsc_g_a'})
+        personal_info = html.find('div', {'id': "gsc_prf_i"})
+        personal_data = None
 
-            citations_per_year = {}
+        if (personal_info):
+            personal_info = personal_info.find('div', {'class': 'gsc_prf_il'})
+            if personal_info:
+                personal_data = personal_info.get_text()
 
-            for a in citations:
-                z_index = int(a.get_attribute_list('style')[0].split(':')[-1])
-                citations_per_year[str(last_year - z_index)] = a.find("span").get_text()
+        study_fields = html.find('div', {'id': "gsc_prf_int"})
 
-            stats["citationsPerYear"] = citations_per_year
+        if (study_fields):
+            study_fields = [study_field.get_text() for study_field in study_fields.findAll('a')]
+            return {
+                'personal_info': personal_data,
+                'study_fields': study_fields
+            }
 
-        return stats 
-
-    return None
-
-
-def get_personal_data(url):
-    html = get_html(url)
-
-    if not html:
         return None
-
-    personal_info = html.find('div', {'id': "gsc_prf_i"})
-    personal_data = None
-    
-    if (personal_info):
-        personal_info = personal_info.find('div', {'class':'gsc_prf_il'})
-        if personal_info:
-            personal_data = personal_info.get_text()
-
-    study_fields = html.find('div', {'id': "gsc_prf_int"})
-
-    if (study_fields):
-        study_fields = [study_field.get_text() for study_field in study_fields.findAll('a')]
-        return {
-            'personal_info': personal_data,
-            'study_fields': study_fields
-        }
-
-    return None
-
-
-def get_html(url, cache_last=True):
-    if _last_petition['url'] == url and cache_last:
-        return _last_petition['html']
-
-    _last_petition["url"] = url
-    request = urllib.request.Request(url)
-    try:
-        response = urllib.request.urlopen(request)
-        html = BeautifulSoup(response.read(), 'html.parser')
-        _last_petition["html"] = html
-        return html
-    except urllib.error.HTTPError as err:
-        logging.warning(str(err) + " - " + url)
-        _last_petition["html"] = None
-
-    return None
 
 
 

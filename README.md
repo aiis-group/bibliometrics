@@ -1,6 +1,7 @@
 # Bibliometrics Scraper
 
-Python script that reads ULPGC researcher data from a file and scraps information from Google Scholar if the url is given. Generates a new file with the collected information. 
+Python script that reads ULPGC researcher data from a file and scraps information from Google 
+Scholar if the url is given. Generates a new file with the collected information. 
 
 ## Features
 
@@ -11,7 +12,7 @@ Python script that reads ULPGC researcher data from a file and scraps informatio
     - Citations
     - i10 Index
     - h Index
-    - Citations per year (only JSON. TODO: xls csv!!)
+    - Citations per year
 - Data formatting
 
 ## Installation (TODO!!)
@@ -23,8 +24,6 @@ cd ~/ProyectFolder/
 cp ... ./
 ./installer.sh
 ```
-
-You can also clone this repo and run the built in installer.sh
 
 ## Usage
 
