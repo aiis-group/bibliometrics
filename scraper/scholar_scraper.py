@@ -39,7 +39,7 @@ class ScholarScraper(Scraper):
 
                 # TODO: improve order during writing.
                 for year in range(first_year, last_year, 1):
-                    if year not in citations_per_year:
+                    if str(year) not in citations_per_year:
                         citations_per_year[str(year)] = '0'
 
                 stats["citationsPerYear"] = citations_per_year
