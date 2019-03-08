@@ -8,9 +8,9 @@ class Researcher:
         self.rg_url = rg_url
         self.orcid = orcid
 
-        # set after initialization.
+        # to set after
         self.scholar_data = None
-        
+        self.rg_data = None
 
     def to_dict(self):
         """ A representation of this Researcher as a dict following JSON
@@ -25,7 +25,8 @@ class Researcher:
         if self.scholar_url:    data['googleScholarURL'] = self.scholar_url
         if self.rg_url:         data['researchGateURL'] = self.rg_url
         if self.orcid:          data['orcid'] = self.orcid
-        if self.scholar_data:   data['scholarStats'] = self.scholar_data
+        if self.scholar_data:   data['scholarData'] = self.scholar_data
+        if self.rg_data:        data['researchGateData'] = self.rg_data
 
         return data
     

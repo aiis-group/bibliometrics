@@ -1,7 +1,8 @@
 from scraper.scholar_scraper import ScholarScraper
 from persistence.data_writer import json_writer, csv_writer, xls_writer
 from persistence.data_reader import cris_excel_reader as reader
-import time, os, argparse, logging
+import time, sys, os, argparse, logging
+from utils.validation_utils import is_valid_rg_profile_url, is_valid_scholar_profile_url
 
 _input_file = './data/dataCRIS.xls'
 _output_dir = './results'
@@ -42,31 +43,33 @@ def configure_loggin():
         logging_handlers.append(logging.FileHandler(_log_file, 'w', 'utf-8'))
 
     logging.basicConfig(handlers=logging_handlers, level=logging.DEBUG, datefmt='%H:%M:%S',
-                        format='%(asctime)s %(levelname)s %(message)s')
+                        format='%(asctime)s - %(message)s')
 
 
-def scrap_scholar(researchers):
-    scraper = ScholarScraper()
-    researchers_in_scholar = [r for r in researchers if r.scholar_url]
-    size = len(researchers_in_scholar)
-    for index, researcher in enumerate(researchers_in_scholar):
-        print("\rScraping Google Scholar Stats... [%s/%s]" % (index + 1, size), end='')
+def check_rg_researchers_url(researchers):
+    not_valid = [r for r in researchers if r.rg_url and not is_valid_rg_profile_url(r.rg_url)]
 
-        scholar_data = {
-            'personal_data': scraper.get_personal_data(researcher.scholar_url),
-            'stats': scraper.get_stats(researcher.scholar_url)
-        }
+    for r in not_valid:
+        wmsg = "[Not valid ResearchGate URL for " + r.crisid + " - " + r.first_name + " " + r.last_name + "]: " + r.rg_url
+        logging.warning(wmsg)
 
-        if not scholar_data['personal_data'] and not scholar_data['stats']:
-            wmessage = str(
-                "Scholar URL Deprecated, please update: " + researcher.first_name + " " + researcher.last_name)
+    return not_valid
+
+
+def scrap (researchers, url_attribute_name, data_attribute_name, scraper):
+    size = len(researchers)
+    for index, r in enumerate(researchers):
+        url = getattr(r, url_attribute_name)
+        print("\rScraping with %s [%s/%s]: %s " % (scraper.__class__.__name__, index+1, size, r.crisid), end='')
+
+        data = {'personal_data': scraper.get_personal_data(url), 'stats': scraper.get_stats(url) }
+
+        if not data['personal_data'] and not data['stats']:
+            wmessage = "[No data for %s - %s %s. Check if profile still exists] URL: %s" % \
+                       (r.crisid, r.first_name, r.last_name, url)
             logging.warning(wmessage)
-            logging.getLogger().handlers[0].flush()
         else:
-            researcher.scholar_data = scholar_data
-
-    print("\rScraping Google Scholar Stats... [%s/%s] Done!" % (index + 1, size), )
-
+            setattr(r, data_attribute_name, data)
 
 def store_results(researchers):
     if 'json' in _format:
@@ -86,17 +89,28 @@ if __name__ == "__main__":
         os.makedirs(_output_dir)
         print("Created: " + os.path.abspath(_output_dir))
 
-
     start = time.time()
 
+    # LOAD RESEARCHERS
     start_load = time.time()
     researchers = reader.load_researchers(_input_file, 'main_entities')
     end_load = time.time()
 
+    # CHECK
+    sys.stdout.flush()
+    check_rg_researchers_url(researchers)
+
+    # SCRAPING!
     start_scrap = time.time()
-    scrap_scholar(researchers)
+
+    scrap([r for r in researchers if r.scholar_url and is_valid_scholar_profile_url(r.scholar_url)],
+          "scholar_url", "scholar_data", ScholarScraper())
+
+    # scrap([r for r in researchers if r.rg_url and is_valid_rg_profile_url(r.rg_url)],
+    #        "rg_url", "rg_data", ResearchGateScraper())
     end_scrap = time.time()
-    
+
+    # STORE
     start_store = time.time()
     store_results(researchers)
     end_store = time.time()
