@@ -28,9 +28,19 @@ class ScholarScraper(Scraper):
 
                 citations_per_year = {}
 
+                # get all citations per year
                 for a in citations:
                     z_index = int(a.get_attribute_list('style')[0].split(':')[-1])
                     citations_per_year[str(last_year - z_index)] = a.find("span").get_text()
+
+                # add years with 0
+                z_index = int(citations[0].get_attribute_list('style')[0].split(':')[-1])  # first year
+                first_year = last_year - z_index
+
+                # TODO: improve order during writing.
+                for year in range(first_year, last_year, 1):
+                    if year not in citations_per_year:
+                        citations_per_year[str(year)] = '0'
 
                 stats["citationsPerYear"] = citations_per_year
 
