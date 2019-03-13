@@ -5,11 +5,11 @@ if __name__ == "__main__":
     scraper = ScholarScraper()
 
     # URL to scrap.
-    url = "https://scholar.google.fr/citations?user=T2g-j1IAAAAJ&hl=es"
+    url = "https://scholar.google.es/citations?user=ZveNB-8AAAAJ&hl=es"
 
     # Scraptime!
     personal_data = scraper.get_personal_data(url)
-    stats = scraper.get_stats(url)
+    stats = scraper.get_stats(url) # using cached html ;)!
 
     print(personal_data)
     print(stats)

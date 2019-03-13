@@ -1,4 +1,5 @@
 from .scraper import Scraper
+from collections import OrderedDict
 
 class ScholarScraper(Scraper):
 
@@ -37,12 +38,11 @@ class ScholarScraper(Scraper):
                 z_index = int(citations[0].get_attribute_list('style')[0].split(':')[-1])  # first year
                 first_year = last_year - z_index
 
-                # TODO: improve order during writing.
                 for year in range(first_year, last_year, 1):
                     if str(year) not in citations_per_year:
                         citations_per_year[str(year)] = '0'
 
-                stats["citationsPerYear"] = citations_per_year
+                stats["citationsPerYear"] = OrderedDict(sorted(citations_per_year.items()))
 
             return stats
 
