@@ -1,7 +1,6 @@
 from .scraper import Scraper
 
 class ResearchGateScraper(Scraper):
-
     def get_stats(self, url):
         html = self._get_html(url)
 
@@ -39,7 +38,7 @@ class ResearchGateScraper(Scraper):
 
         if (personal_info):
             personal_info = personal_info.findAll('a')
-            personal_data['university'] = personal_info[0].get_text()
+            personal_data['organization'] = personal_info[0].get_text()
             personal_data['department'] = personal_info[1].get_text()
 
         personal_info = html.find('div', {

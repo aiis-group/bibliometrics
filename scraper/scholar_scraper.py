@@ -2,8 +2,8 @@ from .scraper import Scraper
 
 class ScholarScraper(Scraper):
 
-    def get_stats(self, url):
-        html = self._get_html(url)
+    def get_stats(self, url, force_refresh=False):
+        html = self._get_html(url, force_refresh)
 
         if not html: return None
 
@@ -49,8 +49,8 @@ class ScholarScraper(Scraper):
         return None
 
 
-    def get_personal_data(self, url):
-        html = self._get_html(url)
+    def get_personal_data(self, url, force_refresh=False):
+        html = self._get_html(url, force_refresh)
 
         if not html:
             return None

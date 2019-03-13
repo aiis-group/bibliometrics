@@ -13,15 +13,15 @@ class Scraper(ABC):
         self._last_petition = {"url": "", "html": ""}
 
     @abstractmethod
-    def get_stats(self, url):
+    def get_stats(self, url, force_refresh=False):
         pass
 
     @abstractmethod
-    def get_personal_data(self, url):
+    def get_personal_data(self, force_refresh=False):
         pass
 
-    def _get_html(self, url, cache_last=True):
-        if self._last_petition['url'] == url and cache_last:
+    def _get_html(self, url, force_refresh=False):
+        if self._last_petition['url'] == url and not force_refresh:
             return self._last_petition['html']
 
         self._last_petition["url"] = url
