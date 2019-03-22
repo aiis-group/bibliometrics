@@ -63,3 +63,6 @@ class ResearchGateScraper(Scraper):
             }
 
         return None
+
+    def get_articles(self, url):
+        print("hola")

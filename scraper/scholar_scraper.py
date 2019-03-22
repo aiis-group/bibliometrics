@@ -74,6 +74,31 @@ class ScholarScraper(Scraper):
 
         return None
 
+    def get_articles(self, url, force_refresh=False):
+        html = self._get_html(url, force_refresh)
+
+        if not html: return None
+
+        articles_table = html.find('tbody', {'id': "gsc_a_b"})
+        articles_data = {}
+
+        if articles_table:
+            for articles_row in articles_table.findAll('tr'):
+                article = articles_row.findAll("td")[0]
+                article_name = article.find('a').get_text()
+                citations = articles_row.findAll("td")[1]
+                year = articles_row.findAll("td")[2]
+
+                articles_data[article_name] = {
+                        'name': article_name,
+                        'authors': article.findAll('div')[0].get_text(),
+                        'publisher': article.findAll('div')[1].get_text(),
+                        'citations': citations.get_text(),
+                        'published_at': year.get_text()
+                    }
+
+        return articles_data
+
 
 
 

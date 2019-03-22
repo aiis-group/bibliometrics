@@ -17,7 +17,7 @@ class Scraper(ABC):
         pass
 
     @abstractmethod
-    def get_personal_data(self, force_refresh=False):
+    def get_articles(self, force_refresh=False):
         pass
 
     def _get_html(self, url, force_refresh=False):

@@ -82,9 +82,13 @@ def scrap (researchers, url_attribute_name, data_attribute_name, scraper):
         url = getattr(r, url_attribute_name)
         print("\rScraping with %s [%s/%s]: %s " % (scraper.__class__.__name__, index+1, size, r.crisid), end='')
 
-        data = {'personal_data': scraper.get_personal_data(url), 'stats': scraper.get_stats(url) }
+        data = {
+            'personal_data': scraper.get_personal_data(url), 
+            'stats': scraper.get_stats(url), 
+            'articles': scraper.get_articles(url) 
+        }
 
-        if not data['personal_data'] and not data['stats']:
+        if not data['personal_data'] and not data['stats'] and not data['articles']:
             wmessage = "[No data for %s - %s %s. Check if profile still exists] URL: %s" % \
                        (r.crisid, r.first_name, r.last_name, url)
             logging.warning(wmessage)
