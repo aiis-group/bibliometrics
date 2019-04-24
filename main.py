@@ -1,6 +1,7 @@
 from scraper.scholar_scraper import ScholarScraper
 from persistence.data_writer import json_writer, csv_writer, xls_writer
 from persistence.data_reader import cris_excel_reader as reader
+from firebase.database import DataBase
 import time, sys, os, argparse, logging
 from utils.validation_utils import is_valid_rg_profile_url, is_valid_scholar_profile_url
 
@@ -103,6 +104,10 @@ def store_results(researchers):
     if 'xls' in _format:
         xls_writer.store_researchers(researchers, _output_dir + "/" + _output_filename + ".xls")
 
+def upload_results(researchers):
+    db = DataBase()
+    responses = [db.addResearcher(researcher) for researcher in researchers]
+
 
 if __name__ == "__main__":
     parseArgs()
@@ -137,7 +142,8 @@ if __name__ == "__main__":
 
     # STORE
     start_store = time.time()
-    store_results(researchers)
+    # store_results(researchers)
+    upload_results(researchers)
     end_store = time.time()
 
     end = time.time()
