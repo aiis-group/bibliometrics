@@ -5,7 +5,7 @@ from firebase_admin import db
 
 
 class DataBase:
-    def __init__(self, cred='./credentials.json', endpoint='INTRODUCE_ENDPOINT', ref='/'):
+    def __init__(self, cred='./credentials.json', endpoint='bibliometrics-86d67', ref='/'):
         # Fetch the service account key JSON file contents
         cred = credentials.Certificate(cred)
         # Initialize the app with a service account, granting admin privileges
@@ -21,6 +21,19 @@ class DataBase:
 
     def addResearcher(self, researcher):
         return self.db.child('researchers/'+researcher.crisid).set(researcher.to_dict())
+
+    def setOrUpdateResearcher(self, researcher):
+        if (self.getResearcher(researcher.crisID)):
+            return self.addResearcher(researcher)
+        else:
+            return self.updateResearcher(researcher)
+    
+    def updateResearcher(self, researcher):
+        return self.db.child('researchers/'+researcher.crisid).update(researcher.to_dict())
+
+    
+    def getResearcher(self, crisID):
+        return self.db.child('researchers/'+crisID).get()
 
 
 

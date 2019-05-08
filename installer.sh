@@ -28,6 +28,7 @@ pip install xlrd==1.2.0
 pip install xlwt==1.3.0
 pip install pandas==0.24.1
 pip install urllib==1.24.1
+pip install firebase_admin==2.16.0
 pip install beautifulsoup4==4.7.1
 
 echo "Installation finished"

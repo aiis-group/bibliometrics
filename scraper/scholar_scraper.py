@@ -58,6 +58,7 @@ class ScholarScraper(Scraper):
         personal_info = html.find('div', {'id': "gsc_prf_i"})
         personal_data = None
 
+
         if (personal_info):
             personal_info = personal_info.find('div', {'class': 'gsc_prf_il'})
             if personal_info:
@@ -75,31 +76,40 @@ class ScholarScraper(Scraper):
         return None
 
     def get_articles(self, url, force_refresh=False):
-        html = self._get_html(url, force_refresh)
 
-        if not html: return None
-
-        articles_table = html.find('tbody', {'id': "gsc_a_b"})
+        url += '&pagesize=100&cstart='
         articles_data = []
 
-        if articles_table:
-            i = 0
-            for articles_row in articles_table.findAll('tr'):
-                article = articles_row.findAll("td")[0]
-                article_name = article.find('a').get_text()
-                citations = articles_row.findAll("td")[1]
-                year = articles_row.findAll("td")[2]
+        for i in range(0, 15):
+            
+            idx = str(i)+'00'
+            html = self._get_html(url+idx, force_refresh)
 
-                articles_data.append({
-                        'name': article_name,
-                        'authors': article.findAll('div')[0].get_text(),
-                        'publisher': article.findAll('div')[1].get_text(),
-                        'citations': citations.get_text(),
-                        'published_at': year.get_text()
-                    })
+            if not html: return None
+
+            articles_table = html.find('tbody', {'id': "gsc_a_b"})
+            error_msg = articles_table.find('td', {'class': 'gsc_a_e'})
+
+            if error_msg and error_msg.get_text() == "No hay ningún artículo en este perfil.":
+                return articles_data
+
+            if articles_table:
+                for articles_row in articles_table.findAll('tr'):
+                    article = articles_row.findAll("td")[0]
+                    article_name = article.find('a').get_text()
+                    citations = articles_row.findAll("td")[1]
+                    year = articles_row.findAll("td")[2]
+
+                    articles_data.append({
+                            'name': article_name,
+                            'authors': article.findAll('div')[0].get_text(),
+                            'publisher': article.findAll('div')[1].get_text(),
+                            'citations': citations.get_text(),
+                            'published_at': year.get_text()
+                        })
+
 
         return articles_data
-
 
 
 

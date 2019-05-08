@@ -140,10 +140,14 @@ if __name__ == "__main__":
     #            "rg_url", "rg_data", ResearchGateScraper())
     end_scrap = time.time()
 
+    # TEST
+    store_results(researchers[1:5])
+    # print(researchers[1:5])
+
     # STORE
     start_store = time.time()
-    # store_results(researchers)
-    upload_results(researchers)
+    store_results(researchers)
+    # upload_results(researchers)
     end_store = time.time()
 
     end = time.time()
