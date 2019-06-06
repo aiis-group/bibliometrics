@@ -5,7 +5,19 @@ from firebase_admin import db
 
 
 class DataBase:
+    __instance = None     # Singleton pattern.
+
+    def __new__(cls):
+        if DataBase.__instance is None:
+            DataBase.__instance = object.__new__(cls)
+        return DataBase.__instance
+
     def __init__(self, cred='./credentials.json', endpoint='bibliometrics-86d67', ref='/'):
+        if hasattr(self, 'db'):
+            # If __new__ returns an instance of DataBase (new or not) __init__ is called.
+            # This prevents multiple inits.
+            return
+
         # Fetch the service account key JSON file contents
         cred = credentials.Certificate(cred)
         # Initialize the app with a service account, granting admin privileges
