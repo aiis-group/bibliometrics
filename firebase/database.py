@@ -3,7 +3,6 @@ from firebase_admin import credentials
 from firebase_admin import db
 
 
-
 class DataBase:
     __instance = None     # Singleton pattern.
 
@@ -12,10 +11,12 @@ class DataBase:
             DataBase.__instance = object.__new__(cls)
         return DataBase.__instance
 
-    def __init__(self, cred='./credentials.json', endpoint='bibliometrics-86d67', ref='/'):
+    def __init__(self, cred='./credentials.json',
+                       endpoint='bibliometrics-86d67', ref='/'):
+
         if hasattr(self, 'db'):
-            # If __new__ returns an instance of DataBase (new or not) __init__ is called.
-            # This prevents multiple inits.
+            # If __new__ returns an instance of DataBase (new or not)
+            # __init__ is called. This prevents multiple inits.
             return
 
         # Fetch the service account key JSON file contents
@@ -26,26 +27,34 @@ class DataBase:
         })
 
         self.db = db.reference(ref)
-    
+        self.researchers = None
 
-    def getAllResearchers(self):
-        return self.db.child('researchers').get()
-
-    def addResearcher(self, researcher):
-        return self.db.child('researchers/'+researcher.crisid).set(researcher.to_dict())
-
-    def setOrUpdateResearcher(self, researcher):
-        if (self.getResearcher(researcher.crisID)):
-            return self.addResearcher(researcher)
-        else:
-            return self.updateResearcher(researcher)
+    def rootReference(self):
+        return self.db
     
     def updateResearcher(self, researcher):
         return self.db.child('researchers/'+researcher.crisid).update(researcher.to_dict())
-
     
     def getResearcher(self, crisID):
         return self.db.child('researchers/'+crisID).get()
 
+    def getAllScholarIds(self):
+        return db.reference("scholarIds").get()
 
+
+    # Legacy.
+    def getAllResearchers(self):
+        if self.researchers is None:
+            self.researchers = self.db.child('researchers').get()
+
+        return self.researchers
+
+    def addResearcher(self, researcher):
+        return self.db.child('researchers/'+researcher.crisid).set(researcher.to_dict())
+
+    def updateScholarIds(self, newIDs):
+        return self.db.child('scholarIds').update(newIDs)
+
+    def updateResearchers(self, newRes):
+        return self.db.child('researchers').update(newRes)
 

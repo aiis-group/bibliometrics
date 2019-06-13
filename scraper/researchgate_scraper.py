@@ -2,7 +2,7 @@ from .scraper import Scraper
 
 class ResearchGateScraper(Scraper):
     def get_stats(self, url):
-        html = self._get_html(url)
+        html = self.get_html(url)
 
         if not html:
             return None
@@ -23,7 +23,7 @@ class ResearchGateScraper(Scraper):
         return None
 
     def get_personal_data(self, url):
-        html = self._get_html(url)
+        html = self.get_html(url)
         personal_data = {}
 
         if not html:

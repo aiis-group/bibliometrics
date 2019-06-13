@@ -1,10 +1,12 @@
+from utils import utils
 from .scraper import Scraper
 from collections import OrderedDict
 
+
 class ScholarScraper(Scraper):
 
-    def get_stats(self, url, force_refresh=False):
-        html = self._get_html(url, force_refresh)
+    def get_stats(self, author_url, force_refresh=False):
+        html = self.get_html(author_url, force_refresh)
 
         if not html: return None
 
@@ -48,9 +50,8 @@ class ScholarScraper(Scraper):
 
         return None
 
-
-    def get_personal_data(self, url, force_refresh=False):
-        html = self._get_html(url, force_refresh)
+    def get_personal_data(self, author_url, force_refresh=False):
+        html = self.get_html(author_url, force_refresh)
 
         if not html:
             return None
@@ -75,15 +76,15 @@ class ScholarScraper(Scraper):
 
         return None
 
-    def get_articles(self, url, force_refresh=False):
+    def get_articles(self, author_url, force_refresh=False):
 
-        url += '&pagesize=100&cstart='
+        author_url += '&pagesize=100&cstart='
         articles_data = []
 
         for i in range(0, 15):
             
             idx = str(i)+'00'
-            html = self._get_html(url+idx, force_refresh)
+            html = self.get_html(author_url + idx, force_refresh)
 
             if not html: return None
 
@@ -111,21 +112,22 @@ class ScholarScraper(Scraper):
 
         return articles_data
 
+    def get_researchers_from_search_result_page(self, url, force_refresh=False):
+        html = self.get_html(url, force_refresh)
 
+        authors = {}
 
-# TODO (Futuro) buscar la URL de Scholar del investigador/a si no tiene.
-#       Requiere cuidado con captchas.
-# def get_url(researcher_name):
-#     url = "https://scholar.google.es/citations?hl=es&view_op=search_authors&mauthors="
-#     url += "+".join(researcher_name.lower().split(" "))
-#     url += "+ulpgc&btnG="
-#     html = get_html(url)
-#
-#     if html != None:
-#         researcher_panel = html.find('h3', {'class': "gsc_oai_name"})
-#
-#         if (researcher_panel):
-#             scholar_url = researcher_panel.find('a')['href']
-#             return "https://scholar.google.es"+scholar_url
-#
-#     return None
+        authors_elms = html.select('.gs_ai_t')
+        if not authors_elms:
+            raise Exception("captcha" if html.find(text="CAPTCHA") else "error")
+
+        for author in authors_elms:
+            scholar_url = author.select("h3 > a")[0]['href']
+            scholar_id = utils.scholar_author_id_from_url(scholar_url)
+            if scholar_id not in authors.keys():
+                authors[scholar_id] = {
+                    "name": author.select("h3 > a")[0].get_text(),
+                    "affiliation": author.select(".gs_ai_aff")[0].get_text()
+                }
+
+        return authors
