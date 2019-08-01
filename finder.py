@@ -308,7 +308,7 @@ class Finder:
                 self.current['new_researchers'][scholar_id] = author
 
         finder_db_api.addNewAuthors(news)
-        self.current['total_researchers'] += len(authors.items)
+        self.current['total_researchers'] += len(authors.items())
 
         next_button = html.select(".gs_btnPR")[0]
         if not next_button.has_attr("disabled"):
@@ -417,7 +417,3 @@ if __name__ == "__main__":
 
 
 
-
-# TODO: Contar el número total de investigadores.
-#       > No se necesitará almacenar página en sí (es lo mismo que total/10).
-# FIXME: se está contando el número de nuevos como el total.

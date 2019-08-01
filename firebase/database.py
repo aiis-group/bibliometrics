@@ -1,7 +1,8 @@
+import os
+
 import firebase_admin, json
 from firebase_admin import credentials
 from firebase_admin import db
-
 
 class DataBase:
     __instance = None     # Singleton pattern.
@@ -19,8 +20,15 @@ class DataBase:
             # __init__ is called. This prevents multiple inits.
             return
 
+        #  s3 = S3Connection(os.environ['S3_KEY'], os.environ['S3_SECRET'])
+
         # Fetch the service account key JSON file contents
-        cred = credentials.Certificate(cred)
+
+        cred = credentials.Certificate(
+            cred if os.path.exists(cred)
+            else json.loads(os.environ["firebase_api_key"])
+        )
+            
         # Initialize the app with a service account, granting admin privileges
         firebase_admin.initialize_app(cred, {
             'databaseURL': 'https://'+endpoint+'.firebaseio.com/'

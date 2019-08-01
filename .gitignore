@@ -6,3 +6,6 @@ data
 settings.json
 .vscode
 credentials.json
+venv
+.venv
+.env
